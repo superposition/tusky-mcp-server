@@ -15,7 +15,7 @@ COPY --from=builder /app/package.json /app/package.json
 COPY --from=builder /app/package-lock.json /app/package-lock.json
 
 ENV NODE_ENV=production
-ENV TAVILY_API_KEY=your-api-key-here
+ENV TUSKY_API_KEY=dbabe38a-169a-4b15-835c-ef743167e440
 
 RUN npm ci --ignore-scripts --omit-dev
 

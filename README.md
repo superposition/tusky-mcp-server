@@ -1,64 +1,70 @@
-# MCP Server Template 🚀
+# Tusky MCP Server 🚀
 
-A clean template for building [Model Context Protocol (MCP)](https://docs.anthropic.com/claude/docs/model-context-protocol) servers.
+A Model Context Protocol (MCP) server for the [Tusky API](https://docs.tusky.io/http-api) that enables AI assistants like Claude to interact with the Tusky social media platform.
 
 ## What is MCP?
 
 The Model Context Protocol (MCP) is an open standard developed by Anthropic that enables AI systems like Claude to interact seamlessly with various data sources and tools, facilitating secure, two-way connections.
 
-This template provides a starting point for building your own MCP server that can be used with Claude Desktop, Cursor, or any other MCP client.
+This MCP server allows Claude and other MCP clients to access Tusky's functionality directly.
 
-## Template Features
+## Tusky API Integration Features
 
-This template includes:
+This MCP server provides the following Tusky API capabilities:
 
-- Basic server structure with the MCP SDK
-- Example tool definitions with commented placeholders
-- Error handling setup
-- Environment variable configuration via dotenv
+- Retrieving posts with filtering by author, hashtags, or keywords
+- Creating new posts with customizable visibility settings
+- Searching for users by username or display name
+- Getting detailed user profile information
 
 ## Prerequisites 🔧
 
 Before you begin, ensure you have:
 
-- Your API key for whatever service you're wrapping (if applicable)
+- A Tusky API key (get one from [Tusky's developer portal](https://docs.tusky.io/http-api))
 - Node.js (v20 or higher)
 - An MCP client like Claude Desktop or Cursor
 
 ## Installation ⚡
 
-1. Clone this template repository:
+1. Clone this repository:
 ```shell
-git clone https://github.com/yourusername/mcp-server-template.git
-cd mcp-server-template
+git clone https://github.com/yourusername/tusky-mcp-server.git
+cd tusky-mcp-server
 ```
 
 2. Install dependencies:
 ```shell
 npm install
+# or if you prefer pnpm
+pnpm install
 ```
 
-3. Build the project:
+3. Create a `.env` file in the root directory with your Tusky API key:
+```
+TUSKY_API_KEY=your-api-key-here
+```
+
+4. Build the project:
 ```shell
 npm run build
 ```
 
-## Customization Guide 🔧
+## Available Tools
 
-To customize this template for your own MCP server:
+This MCP server provides the following tools for interacting with Tusky:
 
-1. Update `package.json` with your server name and details
-2. Modify `src/index.ts` to:
-   - Define your API response interface
-   - Add your actual tools and their schemas
-   - Implement the tool functionality
-   - Update the formatting logic
+### tusky_get_posts
+Retrieves posts from Tusky with optional filtering by author, hashtag, or keyword.
 
-### Key Files to Modify
+### tusky_create_post
+Creates a new post on Tusky with customizable visibility settings.
 
-- `src/index.ts`: The main server implementation
-- `package.json`: Package metadata and dependencies
-- `.env`: Create this file to store your API keys (make sure to add to .gitignore)
+### tusky_search_users
+Searches for Tusky users by username or display name.
+
+### tusky_get_user_profile
+Gets detailed information about a Tusky user profile.
 
 ## Running Your Server 🖥️
 
@@ -67,6 +73,11 @@ You can run your server directly with:
 ```shell
 npm run build
 node build/index.js
+```
+
+For development with automatic rebuilding:
+```shell
+npm run watch
 ```
 
 ## Integrating with MCP Clients
@@ -94,11 +105,11 @@ Add your server configuration:
 ```json
 {
   "mcpServers": {
-    "your-server-name": {
+    "tusky": {
       "command": "node",
       "args": ["/path/to/your/build/index.js"],
       "env": {
-        "YOUR_API_KEY": "your-api-key-here"
+        "TUSKY_API_KEY": "your-tusky-api-key-here"
       }
     }
   }
@@ -111,26 +122,28 @@ Add your server configuration:
 2. Navigate to Features > MCP Servers
 3. Click on the "+ Add New MCP Server" button
 4. Fill out the following information:
-   - Name: Enter a nickname for the server (e.g., "your-server-name")
+   - Name: Enter a nickname for the server (e.g., "tusky")
    - Type: Select "command" as the type
    - Command: Enter the command to run the server:
      ```
-     env YOUR_API_KEY=your-api-key node /path/to/your/build/index.js
+     env TUSKY_API_KEY=your-tusky-api-key node /path/to/your/build/index.js
      ```
 
-## Template Structure Explained
+## Testing the Server
 
-- **Server Setup**: The template creates a basic MCP server with stdio transport
-- **Tool Definitions**: Example tool schemas with commented placeholders
-- **Error Handling**: Basic error handling setup with console logging
-- **Request Handling**: Template for handling tool requests with switch/case structure
+You can test the server using the included test client:
+
+```shell
+npm run test-client
+```
 
 ## Contributing
 
-Feel free to use this template as a starting point for your own MCP server. If you improve the template, please consider contributing back via pull requests!
+Contributions to improve this Tusky MCP server are welcome! Please feel free to submit issues or pull requests.
 
 ## Acknowledgments ✨
 
 - [Model Context Protocol](https://docs.anthropic.com/claude/docs/model-context-protocol) for the MCP specification
 - Anthropic for Claude Desktop
-- [Tavily MCP Server](https://github.com/tavily-ai/tavily-mcp) which this template was based on
+- [Tusky](https://docs.tusky.io/http-api) for their API
+- [Tavily MCP Server](https://github.com/tavily-ai/tavily-mcp) for inspiration

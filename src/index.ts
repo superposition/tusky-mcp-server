@@ -5,33 +5,47 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {CallToolRequestSchema, ListToolsRequestSchema, Tool} from "@modelcontextprotocol/sdk/types.js";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from "dotenv";
+// Fix import for node-fetch v2 by importing without type checking
+// @ts-ignore
+import fetch from "node-fetch";
+import { URLSearchParams } from "url";
 
 // Load environment variables
 dotenv.config();
 
-// Check for API key (replace with your own API key check)
-const API_KEY = process.env.YOUR_API_KEY;
-if (!API_KEY) {
-  throw new Error("YOUR_API_KEY environment variable is required");
+// Check for Tusky API key
+const TUSKY_API_KEY = process.env.TUSKY_API_KEY;
+if (!TUSKY_API_KEY) {
+  throw new Error("TUSKY_API_KEY environment variable is required");
 }
 
-// Define your response interface
-interface YourApiResponse {
-  // Define your API response structure here
-  // For example:
-  // query?: string;
-  // results?: any[];
-  // etc...
+// Tusky API base URL
+const TUSKY_API_BASE = process.env.TUSKY_API_BASE || "https://api.tusky.io";
+
+// Define Tusky API response interfaces
+interface TuskyApiResponse {
+  success: boolean;
+  data?: any;
+  error?: string;
 }
 
-class TemplateClient {
+interface TuskyPost {
+  id: string;
+  content: string;
+  author: string;
+  timestamp: string;
+  likes: number;
+  comments: number;
+}
+
+class TuskyClient {
   // Core client properties
   private server: Server;
 
   constructor() {
     this.server = new Server(
       {
-        name: "your-mcp-template",
+        name: "tusky-mcp-server",
         version: "0.1.0",
       },
       {
@@ -42,16 +56,6 @@ class TemplateClient {
         },
       }
     );
-
-    // Setup API client here if needed
-    // For example, with axios:
-    // this.apiClient = axios.create({
-    //   headers: {
-    //     'accept': 'application/json',
-    //     'content-type': 'application/json',
-    //     'authorization': `Bearer ${API_KEY}`
-    //   }
-    // });
 
     this.setupHandlers();
     this.setupErrorHandling();
@@ -76,76 +80,124 @@ class TemplateClient {
 
   private setupToolHandlers(): void {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      // Define your tools here
+      // Define Tusky API tools
       const tools: Tool[] = [
         {
-          name: "example-tool-1",
-          description: "Description of your first tool. Explain what it does, when to use it, and its capabilities.",
+          name: "tusky_get_posts",
+          description: "Retrieve posts from the Tusky social media platform. Can filter by author, hashtags, or keywords.",
           inputSchema: {
             type: "object",
             properties: {
-              // Define the parameters for your tool
-              parameter1: { 
+              author: { 
                 type: "string", 
-                description: "Description of parameter1" 
+                description: "Filter posts by author username" 
               },
-              parameter2: {
+              hashtag: {
+                type: "string",
+                description: "Filter posts by hashtag (without the # symbol)"
+              },
+              keyword: {
+                type: "string",
+                description: "Filter posts containing this keyword"
+              },
+              limit: {
                 type: "number",
-                description: "Description of parameter2",
+                description: "Maximum number of posts to return",
                 default: 10
-              },
-              // Add more parameters as needed
-            },
-            required: ["parameter1"] // List required parameters
+              }
+            }
           }
         },
-        // Add more tools as needed
         {
-          name: "example-tool-2",
-          description: "Description of your second tool.",
+          name: "tusky_create_post",
+          description: "Create a new post on the Tusky platform.",
           inputSchema: {
             type: "object",
             properties: {
-              // Define the parameters for your second tool
-              urls: { 
-                type: "array",
-                items: { type: "string" },
-                description: "List of items to process"
+              content: { 
+                type: "string", 
+                description: "The content of the post" 
               },
-              // Add more parameters as needed
+              visibility: {
+                type: "string",
+                description: "Post visibility (public, private, followers)",
+                enum: ["public", "private", "followers"],
+                default: "public"
+              }
             },
-            required: ["urls"] // List required parameters
+            required: ["content"]
           }
         },
+        {
+          name: "tusky_search_users",
+          description: "Search for Tusky users by username or display name.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              query: { 
+                type: "string", 
+                description: "Search query for username or display name" 
+              },
+              limit: {
+                type: "number",
+                description: "Maximum number of users to return",
+                default: 10
+              }
+            },
+            required: ["query"]
+          }
+        },
+        {
+          name: "tusky_get_user_profile",
+          description: "Get detailed information about a Tusky user.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              username: { 
+                type: "string", 
+                description: "Username of the Tusky user" 
+              }
+            },
+            required: ["username"]
+          }
+        }
       ];
       return { tools };
     });
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       try {
-        let response: YourApiResponse = {}; // Initialize with default or empty value
+        let response: TuskyApiResponse = { success: false }; 
         const args = request.params.arguments ?? {};
 
         switch (request.params.name) {
-          case "example-tool-1":
-            // Call your first tool's functionality
-            // response = await this.exampleTool1({
-            //   parameter1: args.parameter1,
-            //   parameter2: args.parameter2,
-            //   // Add more parameters as needed
-            // });
-            console.log("example-tool-1 called with:", args);
-            response = {/* your implementation result */};
+          case "tusky_get_posts":
+            response = await this.getPosts({
+              author: args.author,
+              hashtag: args.hashtag,
+              keyword: args.keyword,
+              limit: args.limit || 10
+            });
             break;
           
-          case "example-tool-2":
-            // Call your second tool's functionality
-            // response = await this.exampleTool2({
-            //   urls: args.urls,
-            //   // Add more parameters as needed
-            // });
-            console.log("example-tool-2 called with:", args);
-            response = {/* your implementation result */};
+          case "tusky_create_post":
+            response = await this.createPost({
+              content: args.content,
+              visibility: args.visibility || "public"
+            });
+            break;
+
+          case "tusky_search_users":
+            response = await this.searchUsers({
+              query: args.query,
+              limit: args.limit || 10
+            });
+            break;
+
+          case "tusky_get_user_profile":
+            response = await this.getUserProfile({
+              username: args.username
+            });
             break;
 
           default:
@@ -162,11 +214,12 @@ class TemplateClient {
           }]
         };
       } catch (error: any) {
+        console.error("API error:", error);
         // Handle errors appropriately
         return {
           content: [{
             type: "text",
-            text: `API error: ${error.message}`
+            text: `Tusky API error: ${error.message}`
           }],
           isError: true,
         }
@@ -178,36 +231,115 @@ class TemplateClient {
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error("Template MCP server running on stdio");
+    console.error("Tusky MCP server running on stdio");
   }
 
-  // Implement your tool methods here
-  // For example:
-  // async exampleTool1(params: any): Promise<YourApiResponse> {
-  //   // Implement your tool's functionality
-  //   // This is where you would call your APIs or perform operations
-  //   return { /* your response */ };
-  // }
-  //
-  // async exampleTool2(params: any): Promise<YourApiResponse> {
-  //   // Implement your tool's functionality
-  //   return { /* your response */ };
-  // }
+  // Implement Tusky API methods
+  async getPosts(params: any): Promise<TuskyApiResponse> {
+    const queryParams = new URLSearchParams();
+    if (params.author) queryParams.append('author', params.author);
+    if (params.hashtag) queryParams.append('hashtag', params.hashtag);
+    if (params.keyword) queryParams.append('keyword', params.keyword);
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    
+    const url = `${TUSKY_API_BASE}/posts?${queryParams.toString()}`;
+    return this.makeApiRequest('GET', url);
+  }
+
+  async createPost(params: any): Promise<TuskyApiResponse> {
+    const url = `${TUSKY_API_BASE}/posts`;
+    return this.makeApiRequest('POST', url, params);
+  }
+
+  async searchUsers(params: any): Promise<TuskyApiResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('query', params.query);
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    
+    const url = `${TUSKY_API_BASE}/users/search?${queryParams.toString()}`;
+    return this.makeApiRequest('GET', url);
+  }
+
+  async getUserProfile(params: any): Promise<TuskyApiResponse> {
+    const url = `${TUSKY_API_BASE}/users/${params.username}`;
+    return this.makeApiRequest('GET', url);
+  }
+
+  // Helper method to make API requests
+  private async makeApiRequest(method: string, url: string, body?: any): Promise<TuskyApiResponse> {
+    try {
+      // Define headers with the correct type
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${TUSKY_API_KEY}`,
+        'Accept': 'application/json'
+      };
+
+      // Define request options
+      let options: any = {
+        method,
+        headers
+      };
+
+      if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+        options.body = JSON.stringify(body);
+      }
+
+      // Use a more direct approach with explicit type casting
+      const response = await fetch(url, options as any);
+      const data = await response.json() as any;
+
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+      }
+
+      return {
+        success: true,
+        data
+      };
+    } catch (error: any) {
+      console.error(`Error making ${method} request to ${url}:`, error.message);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
 }
 
 // Format results for display
-function formatResults(response: YourApiResponse): string {
-  // Format your API response into human-readable text
-  // This is just a placeholder - implement your own formatting logic
-  return "Formatted results would appear here\n" + JSON.stringify(response, null, 2);
+function formatResults(response: TuskyApiResponse): string {
+  if (!response.success) {
+    return `Error: ${response.error || 'Unknown error occurred'}`;
+  }
+
+  // Format based on data structure
+  if (Array.isArray(response.data)) {
+    return response.data.map((item, index) => {
+      if (item.content) {  // If it's a post
+        return `Post ${index + 1}:\n  Author: ${item.author}\n  Content: ${item.content}\n  Likes: ${item.likes}\n  Comments: ${item.comments}\n  Time: ${item.timestamp}\n`;
+      } else {  // Generic handling
+        return `Item ${index + 1}:\n${Object.entries(item).map(([key, value]) => `  ${key}: ${value}`).join('\n')}\n`;
+      }
+    }).join('\n');
+  } else if (response.data && typeof response.data === 'object') {
+    return Object.entries(response.data).map(([key, value]) => {
+      if (typeof value === 'object' && value !== null) {
+        return `${key}:\n${JSON.stringify(value, null, 2)}`;
+      }
+      return `${key}: ${value}`;
+    }).join('\n');
+  }
+
+  return JSON.stringify(response.data, null, 2);
 }
 
 // Export server start function
 export async function serve(): Promise<void> {
-  const client = new TemplateClient();
+  const client = new TuskyClient();
   await client.run();
 }
 
 // Start the server when this file is run directly
-const server = new TemplateClient();
+const server = new TuskyClient();
 server.run().catch(console.error);

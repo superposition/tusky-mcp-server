@@ -1,10 +1,10 @@
 {
-  "name": "mcp-server-template",
+  "name": "tusky-mcp-server",
   "version": "0.1.0",
-  "description": "Template for building MCP servers based on the Model Context Protocol",
+  "description": "MCP server for integrating with the Tusky API based on the Model Context Protocol",
   "type": "module",
   "bin": {
-    "mcp-server-template": "./build/index.js"
+    "tusky-mcp-server": "./build/index.js"
   },
   "files": [
     "build"
@@ -29,10 +29,12 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "0.6.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "node-fetch": "^2.6.12"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
+    "@types/node-fetch": "^2.6.9",
     "typescript": "^5.3.3"
   }
 }
