@@ -1,70 +1,213 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import fs from 'fs';
-import path from 'path';
-import mcpRoutes from './routes/mcp.routes.js';
+#!/usr/bin/env node
 
-// Get current module path for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {CallToolRequestSchema, ListToolsRequestSchema, Tool} from "@modelcontextprotocol/sdk/types.js";
+import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
+import dotenv from "dotenv";
 
 // Load environment variables
 dotenv.config();
 
-// Create Express app
-const app = express();
-const port = process.env.PORT || 3000;
-
-// Middleware
-app.use(cors());
-app.use(bodyParser.json({ limit: '50mb' }));  // Increased limit for larger payloads
-
-// Ensure logs directory exists
-const logsDir = path.join(process.cwd(), 'logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir);
+// Check for API key (replace with your own API key check)
+const API_KEY = process.env.YOUR_API_KEY;
+if (!API_KEY) {
+  throw new Error("YOUR_API_KEY environment variable is required");
 }
 
-// Register MCP routes
-app.use('/mcp', mcpRoutes);
+// Define your response interface
+interface YourApiResponse {
+  // Define your API response structure here
+  // For example:
+  // query?: string;
+  // results?: any[];
+  // etc...
+}
 
-// Basic health check route
-app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'ok', message: 'Tusky MCP server is running' });
-});
+class TemplateClient {
+  // Core client properties
+  private server: Server;
 
-// Documentation route
-app.get('/', (req: Request, res: Response) => {
-  res.status(200).json({
-    name: "Tusky MCP Server",
-    version: "1.0.0",
-    description: "Model Context Protocol (MCP) server implementation",
-    endpoints: {
-      healthCheck: "/health",
-      mcpEndpoints: {
-        query: "/mcp/v1/query",
-        observe: "/mcp/v1/observe",
-        resources: "/mcp/v1/resources",
-        tools: "/mcp/v1/tools"
+  constructor() {
+    this.server = new Server(
+      {
+        name: "your-mcp-template",
+        version: "0.1.0",
+      },
+      {
+        capabilities: {
+          resources: {},
+          tools: {},
+          prompts: {},
+        },
       }
-    }
-  });
-});
+    );
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Tusky MCP server running on port ${port}`);
-  console.log(`Documentation available at: http://localhost:${port}/`);
-  console.log(`Health check available at: http://localhost:${port}/health`);
-  console.log(`MCP endpoints available at:`);
-  console.log(`  - POST http://localhost:${port}/mcp/v1/query`);
-  console.log(`  - POST http://localhost:${port}/mcp/v1/observe`);
-  console.log(`  - GET  http://localhost:${port}/mcp/v1/resources`);
-  console.log(`  - GET  http://localhost:${port}/mcp/v1/tools`);
-});
+    // Setup API client here if needed
+    // For example, with axios:
+    // this.apiClient = axios.create({
+    //   headers: {
+    //     'accept': 'application/json',
+    //     'content-type': 'application/json',
+    //     'authorization': `Bearer ${API_KEY}`
+    //   }
+    // });
 
-export default app;
+    this.setupHandlers();
+    this.setupErrorHandling();
+  }
+
+  private setupErrorHandling(): void {
+    // Error handling setup
+    this.server.onerror = (error) => {
+      console.error("[MCP Error]", error);
+    };
+
+    // Handle process termination
+    process.on('SIGINT', async () => {
+      await this.server.close();
+      process.exit(0);
+    });
+  }
+
+  private setupHandlers(): void {
+    this.setupToolHandlers();
+  }
+
+  private setupToolHandlers(): void {
+    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
+      // Define your tools here
+      const tools: Tool[] = [
+        {
+          name: "example-tool-1",
+          description: "Description of your first tool. Explain what it does, when to use it, and its capabilities.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              // Define the parameters for your tool
+              parameter1: { 
+                type: "string", 
+                description: "Description of parameter1" 
+              },
+              parameter2: {
+                type: "number",
+                description: "Description of parameter2",
+                default: 10
+              },
+              // Add more parameters as needed
+            },
+            required: ["parameter1"] // List required parameters
+          }
+        },
+        // Add more tools as needed
+        {
+          name: "example-tool-2",
+          description: "Description of your second tool.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              // Define the parameters for your second tool
+              urls: { 
+                type: "array",
+                items: { type: "string" },
+                description: "List of items to process"
+              },
+              // Add more parameters as needed
+            },
+            required: ["urls"] // List required parameters
+          }
+        },
+      ];
+      return { tools };
+    });
+
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      try {
+        let response: YourApiResponse = {}; // Initialize with default or empty value
+        const args = request.params.arguments ?? {};
+
+        switch (request.params.name) {
+          case "example-tool-1":
+            // Call your first tool's functionality
+            // response = await this.exampleTool1({
+            //   parameter1: args.parameter1,
+            //   parameter2: args.parameter2,
+            //   // Add more parameters as needed
+            // });
+            console.log("example-tool-1 called with:", args);
+            response = {/* your implementation result */};
+            break;
+          
+          case "example-tool-2":
+            // Call your second tool's functionality
+            // response = await this.exampleTool2({
+            //   urls: args.urls,
+            //   // Add more parameters as needed
+            // });
+            console.log("example-tool-2 called with:", args);
+            response = {/* your implementation result */};
+            break;
+
+          default:
+            throw new McpError(
+              ErrorCode.MethodNotFound,
+              `Unknown tool: ${request.params.name}`
+            );
+        }
+
+        return {
+          content: [{
+            type: "text",
+            text: formatResults(response)
+          }]
+        };
+      } catch (error: any) {
+        // Handle errors appropriately
+        return {
+          content: [{
+            type: "text",
+            text: `API error: ${error.message}`
+          }],
+          isError: true,
+        }
+      }
+    });
+  }
+
+  // Run the server
+  async run(): Promise<void> {
+    const transport = new StdioServerTransport();
+    await this.server.connect(transport);
+    console.error("Template MCP server running on stdio");
+  }
+
+  // Implement your tool methods here
+  // For example:
+  // async exampleTool1(params: any): Promise<YourApiResponse> {
+  //   // Implement your tool's functionality
+  //   // This is where you would call your APIs or perform operations
+  //   return { /* your response */ };
+  // }
+  //
+  // async exampleTool2(params: any): Promise<YourApiResponse> {
+  //   // Implement your tool's functionality
+  //   return { /* your response */ };
+  // }
+}
+
+// Format results for display
+function formatResults(response: YourApiResponse): string {
+  // Format your API response into human-readable text
+  // This is just a placeholder - implement your own formatting logic
+  return "Formatted results would appear here\n" + JSON.stringify(response, null, 2);
+}
+
+// Export server start function
+export async function serve(): Promise<void> {
+  const client = new TemplateClient();
+  await client.run();
+}
+
+// Start the server when this file is run directly
+const server = new TemplateClient();
+server.run().catch(console.error);

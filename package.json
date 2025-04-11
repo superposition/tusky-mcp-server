@@ -1,40 +1,38 @@
 {
-  "name": "tusky-mcp-server",
-  "version": "1.0.0",
-  "main": "dist/index.js",
+  "name": "mcp-server-template",
+  "version": "0.1.0",
+  "description": "Template for building MCP servers based on the Model Context Protocol",
   "type": "module",
+  "bin": {
+    "mcp-server-template": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "nodemon --exec \"node --loader ts-node/esm src/index.ts\"",
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "prepublishOnly": "npm run build",
+    "test-client": "node test-client.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/superposition/tusky-mcp-server.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/superposition/tusky-mcp-server/issues"
-  },
-  "homepage": "https://github.com/superposition/tusky-mcp-server#readme",
-  "description": "",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "claude-desktop",
+    "anthropic",
+    "mcp-server",
+    "template"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "github:modelcontextprotocol/typescript-sdk",
-    "body-parser": "^2.2.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "zod": "^3.24.2"
+    "@modelcontextprotocol/sdk": "0.6.0",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.1",
-    "@types/node": "^22.14.0",
-    "nodemon": "^3.1.9",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
   }
 }
