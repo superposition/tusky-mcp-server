@@ -1,25 +1,40 @@
 {
   "name": "tusky-mcp-server",
-  "version": "0.0.1",
-  "description": "An MCP server for Tusky/Mastodon integration",
-  "main": "main.js",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
   "scripts": {
-    "start": "node main.js",
-    "dev": "nodemon main.js",
+    "start": "node dist/index.js",
+    "dev": "nodemon --exec \"node --loader ts-node/esm src/index.ts\"",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "mcp",
-    "tusky",
-    "mastodon",
-    "model-context-protocol"
-  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/superposition/tusky-mcp-server.git"
+  },
+  "keywords": [],
   "author": "",
-  "license": "MIT",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/superposition/tusky-mcp-server/issues"
+  },
+  "homepage": "https://github.com/superposition/tusky-mcp-server#readme",
+  "description": "",
   "dependencies": {
-    "express": "^4.18.2"
+    "@modelcontextprotocol/sdk": "github:modelcontextprotocol/typescript-sdk",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.0",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }
