@@ -22,3 +22,33 @@ export interface VerifyChallengeResponse extends TuskyApiResponse {
     expiresAt: string;
   };
 }
+
+// API Key Management interfaces
+export interface ApiKey {
+  id: string;
+  name: string;
+  prefix: string;
+  createdAt: string;
+  lastUsed?: string;
+  expiresAt?: string;
+}
+
+export interface GetApiKeysResponse extends TuskyApiResponse {
+  data?: {
+    keys: ApiKey[];
+  };
+}
+
+export interface CreateApiKeyResponse extends TuskyApiResponse {
+  data?: {
+    key: ApiKey;
+    secretKey: string; // Full secret key, only provided once upon creation
+  };
+}
+
+export interface DeleteApiKeyResponse extends TuskyApiResponse {
+  data?: {
+    id: string;
+    deleted: boolean;
+  };
+}
