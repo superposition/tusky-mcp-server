@@ -12,9 +12,10 @@ import { registerVaultTools } from "./tools/vaults";
 import { registerVaultModificationTools } from "./tools/vaultModification";
 import { registerFolderTools, registerFolderModificationTools } from "./tools/folders";
 import { registerFileTools } from "./tools/files";
+import { registerFileMetadataTools } from "./tools/metadata"; // Import file metadata tools
 import { registerUserTools } from "./tools/user";
-import { registerSearchTools } from "./tools/search"; // Import search tools
-import { registerUploadTools } from "./tools/uploads"; // Import upload tools
+import { registerSearchTools } from "./tools/search"; 
+import { registerUploadTools } from "./tools/uploads"; 
 import { TuskyApiResponse } from "./types/api";
 import { apiClient, ApiClient } from "./services/apiClient";
 import { authManager } from "./services/authManager";
@@ -76,6 +77,9 @@ export class TuskyMcpServer {
     
     // Register file listing and retrieval tools
     registerFileTools(this);
+    
+    // Register file metadata tools
+    registerFileMetadataTools(this);
     
     // Register user profile tools
     registerUserTools(this);
@@ -213,6 +217,7 @@ export class TuskyMcpServer {
           // The vault tools (list-vaults, get-vault, create-vault, update-vault, delete-vault)
           // and folder tools (list-folders, get-folder, create-folder, update-folder, delete-folder)
           // and file tools (list-files, get-file)
+          // and file metadata tools (get-file-metadata, update-file-metadata, delete-file-metadata)
           // and user tools (get-profile, update-profile)
           // and search tools (search-content)
           // and upload tools (initiate-upload, get-upload-status)
