@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { TuskyApiResponse, AuthChallengeResponse, VerifyChallengeResponse } from '../types/api';
+import { TuskyApiResponse, AuthChallengeResponse, VerifyChallengeResponse, GetApiKeysResponse, CreateApiKeyResponse, DeleteApiKeyResponse } from '../types/api';
 
 /**
  * Client for making authenticated requests to the Tusky API
@@ -96,6 +96,63 @@ export class TuskyApiClient {
         success: false,
         error: error.message,
         message: 'Failed to verify authentication challenge',
+      };
+    }
+  }
+
+  /**
+   * Get all API keys for the authenticated user
+   */
+  public async getApiKeys(): Promise<GetApiKeysResponse> {
+    try {
+      const response = await this.apiClient.get('/api-keys');
+      return response.data as GetApiKeysResponse;
+    } catch (error: any) {
+      console.error('Error retrieving API keys:', error.message);
+      return {
+        success: false,
+        error: error.message,
+        message: 'Failed to retrieve API keys',
+      };
+    }
+  }
+
+  /**
+   * Create a new API key
+   * @param name Display name for the API key
+   * @param expiresInDays Optional expiration in days (null means no expiration)
+   */
+  public async createApiKey(name: string, expiresInDays?: number): Promise<CreateApiKeyResponse> {
+    try {
+      const response = await this.apiClient.post('/api-keys', {
+        name,
+        expiresInDays
+      });
+      return response.data as CreateApiKeyResponse;
+    } catch (error: any) {
+      console.error('Error creating API key:', error.message);
+      return {
+        success: false,
+        error: error.message,
+        message: 'Failed to create API key',
+      };
+    }
+  }
+
+  /**
+   * Delete an API key by ID
+   * @param keyId ID of the API key to delete
+   */
+  public async deleteApiKey(keyId: string): Promise<DeleteApiKeyResponse> {
+    try {
+      const response = await this.apiClient.delete(`/api-keys/${keyId}`);
+      return response.data as DeleteApiKeyResponse;
+    } catch (error: any) {
+      console.error('Error deleting API key:', error.message);
+      return {
+        success: false,
+        error: error.message,
+        message: 'Failed to delete API key',
       };
     }
   }
