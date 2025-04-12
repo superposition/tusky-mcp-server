@@ -12,9 +12,10 @@ The Tusky MCP Server provides a bridge between Tusky storage/Mastodon integratio
 - File and folder management in Tusky vaults
 - User profile and storage management
 - **Search functionality** across vaults, folders, and files
+- **File uploads using TUS protocol** for reliable, resumable file transfers
 - Seamless integration with Claude Desktop and other MCP clients
 
-## Prerequisites 🔧
+## Prerequisites 🛠
 
 Before you begin, ensure you have:
 
@@ -74,6 +75,7 @@ The Tusky MCP Server provides several tools that can be used through compatible 
 - **Folder Management**: Organize your content with folders
 - **File Management**: Upload, download, and manage files
 - **Search**: Find content across all your vaults and folders. [See search documentation](docs/search.md)
+- **File Uploads**: Upload files using the TUS protocol for reliable and resumable file transfers. [See upload documentation](docs/file-uploads.md)
 - **User Profile**: Manage your Tusky profile and settings
 
 ## Integrating with MCP Clients
@@ -147,7 +149,7 @@ We welcome contributions to the Tusky MCP Server! Please see our [contributing g
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments 👏
+## Acknowledgments 🙏
 
 - [Model Context Protocol](https://docs.anthropic.com/claude/docs/model-context-protocol) for the MCP specification
 - Anthropic for Claude Desktop
