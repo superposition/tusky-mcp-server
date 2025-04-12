@@ -101,21 +101,51 @@ search-content:
   nextToken: "token-from-previous-response"
 ```
 
+### Search for Files with Specific Content Type
+
+```
+search-content:
+  query: "presentation"
+  type: "file"
+  contentType: "application/pdf"
+```
+
+### Search for Recently Created Content
+
+```
+search-content:
+  query: "recent"
+  createdAfter: "2025-01-01T00:00:00Z"
+```
+
+### Search for Content with Multiple Tags
+
+```
+search-content:
+  query: "marketing campaign"
+  tags: ["2025", "social-media", "brand"]
+```
+
 ## Best Practices
 
 1. **Use specific search terms** - More specific queries will yield more relevant results
 2. **Filter by type** - If you know you're looking for a specific type of content (vault, folder, or file), use the `type` parameter to narrow results
 3. **Use pagination** - If searching a large dataset, use the `limit` parameter and handle pagination with `nextToken`
 4. **Tag your content** - Using consistent tags makes filtering by tags more effective
+5. **Combine search criteria** - For more precise results, combine multiple search parameters
+6. **Use content type filtering** - When looking for specific file formats, include the content type in your search
 
 ## Troubleshooting
 
 - If search returns too many results, try narrowing your search with additional filters
 - If search returns no results, try broadening your search by removing filters or simplifying your query
 - Ensure you are authenticated before using the search tool
+- For performance reasons, consider limiting your search to specific vaults when possible
+- If experiencing slow search performance, try reducing the `limit` parameter
 
 ## Limitations
 
 - Search is performed across content the authenticated user has access to
 - Full-text search capabilities depend on the Tusky API implementation
 - Performance may vary depending on the size of your storage and complexity of the search query
+- Some special characters may need to be escaped in search queries
