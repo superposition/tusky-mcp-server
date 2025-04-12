@@ -11,6 +11,7 @@ import { getApiKeys, createApiKey, deleteApiKey } from "./tools/apiKeys";
 import { registerVaultTools } from "./tools/vaults";
 import { registerVaultModificationTools } from "./tools/vaultModification";
 import { registerFolderTools, registerFolderModificationTools } from "./tools/folders";
+import { registerFileTools } from "./tools/files";
 import { TuskyApiResponse } from "./types/api";
 import { apiClient, ApiClient } from "./services/apiClient";
 import { authManager } from "./services/authManager";
@@ -67,6 +68,9 @@ export class TuskyMcpServer {
     
     // Register folder creation and modification tools
     registerFolderModificationTools(this);
+    
+    // Register file listing and retrieval tools
+    registerFileTools(this);
   }
 
   /**
@@ -183,6 +187,7 @@ export class TuskyMcpServer {
 
           // The vault tools (list-vaults, get-vault, create-vault, update-vault, delete-vault)
           // and folder tools (list-folders, get-folder, create-folder, update-folder, delete-folder)
+          // and file tools (list-files, get-file)
           // are registered through their respective register*Tools functions
           // and executed through the tool executor system
 
