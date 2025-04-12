@@ -1,11 +1,11 @@
-// src/tools/index.ts (Updated with vault modification tools)
+// src/tools/index.ts (Updated with folder tools)
 
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { createChallengeToolSchema, verifyChallengeToolSchema, checkAuthStatusToolSchema } from "./authentication";
 import { getApiKeysToolSchema, createApiKeyToolSchema, deleteApiKeyToolSchema } from "./apiKeys";
 
-// We don't import vault tool schemas directly since they're registered 
-// through the registerVaultTools function in the TuskyMcpServer class
+// We don't import vault or folder tool schemas directly since they're registered 
+// through the register*Tools functions in the TuskyMcpServer class
 
 /**
  * Export all Tusky MCP tools 
@@ -23,6 +23,9 @@ export const tuskyTools: Tool[] = [
   
   // Vault tools are registered dynamically through registerVaultTools 
   // and registerVaultModificationTools in the TuskyMcpServer class
+  
+  // Folder tools are registered dynamically through registerFolderTools 
+  // and registerFolderModificationTools in the TuskyMcpServer class
   
   // Utility tools
   {
