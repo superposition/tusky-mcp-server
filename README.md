@@ -11,6 +11,7 @@ The Tusky MCP Server provides a bridge between Tusky storage/Mastodon integratio
 - Authentication with the Tusky API
 - File and folder management in Tusky vaults
 - User profile and storage management
+- **Search functionality** across vaults, folders, and files
 - Seamless integration with Claude Desktop and other MCP clients
 
 ## Prerequisites 🔧
@@ -50,7 +51,7 @@ TUSKY_API_URL=https://api.tusky.io/v1
 npm run build
 ```
 
-## Running the Server 🛠️
+## Running the Server 🖥️
 
 Start the server with:
 
@@ -63,6 +64,17 @@ For development with auto-reload:
 ```shell
 npm run watch
 ```
+
+## Feature Documentation
+
+The Tusky MCP Server provides several tools that can be used through compatible MCP clients:
+
+- **Authentication**: Connect to your Tusky account
+- **Vault Management**: Create, list, and modify storage vaults
+- **Folder Management**: Organize your content with folders
+- **File Management**: Upload, download, and manage files
+- **Search**: Find content across all your vaults and folders. [See search documentation](docs/search.md)
+- **User Profile**: Manage your Tusky profile and settings
 
 ## Integrating with MCP Clients
 
@@ -122,7 +134,7 @@ The development is organized in tiers:
 2. **Tier 2 - Authentication**: Auth challenge and API key management
 3. **Tier 3 - Core Listing/Retrieval**: Vault and folder listing
 4. **Tier 4 - Core Creation/Modification**: Create and modify vaults, folders, files
-5. **Tier 5 - Advanced Features**: File uploads, vault sharing
+5. **Tier 5 - Advanced Features**: File uploads, vault sharing, search functionality
 6. **Tier 6 - Infrastructure**: Error handling, response formatting, tests
 
 See the Issues tab for detailed task breakdown.
@@ -135,7 +147,7 @@ We welcome contributions to the Tusky MCP Server! Please see our [contributing g
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments 🙏
+## Acknowledgments 👏
 
 - [Model Context Protocol](https://docs.anthropic.com/claude/docs/model-context-protocol) for the MCP specification
 - Anthropic for Claude Desktop
