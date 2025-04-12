@@ -5,7 +5,11 @@ import {
   ListFilesParams,
   ListFilesResponse,
   GetFileParams,
-  GetFileResponse
+  GetFileResponse,
+  UpdateFileParams,
+  UpdateFileResponse,
+  DeleteFileParams,
+  DeleteFileResponse
 } from '../types/file';
 
 /**
@@ -71,6 +75,36 @@ export class FileClient {
     const url = `${this.basePath}/${params.id}${queryString ? `?${queryString}` : ''}`;
     
     return this.apiClient.get<GetFileResponse>(url);
+  }
+
+  /**
+   * Update a file's properties (name, folder, status)
+   * @param params Parameters for the file update
+   * @returns Promise with the updated file details
+   */
+  public async updateFile(params: UpdateFileParams): Promise<UpdateFileResponse> {
+    return this.apiClient.post<UpdateFileResponse>(`${this.basePath}/${params.id}`, params);
+  }
+
+  /**
+   * Delete a file
+   * @param params Parameters for the file deletion
+   * @returns Promise with the deletion status
+   */
+  public async deleteFile(params: DeleteFileParams): Promise<DeleteFileResponse> {
+    const queryParams = new URLSearchParams();
+    
+    // Required vaultId parameter
+    queryParams.append('vaultId', params.vaultId);
+    
+    if (params.permanent) {
+      queryParams.append('permanent', 'true');
+    }
+
+    const queryString = queryParams.toString();
+    const url = `${this.basePath}/${params.id}${queryString ? `?${queryString}` : ''}`;
+    
+    return this.apiClient.delete<DeleteFileResponse>(url);
   }
 
   /**
