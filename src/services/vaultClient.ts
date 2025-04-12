@@ -9,6 +9,7 @@ import {
 } from '../types/vault';
 import { FolderClient, createFolderClient } from './folderClient';
 import { FileClient, createFileClient } from './fileClient';
+import { MetadataClient, createMetadataClient } from './metadataClient';
 
 /**
  * Client for interacting with Tusky Vault API endpoints
@@ -18,6 +19,7 @@ export class VaultClient {
   private basePath = '/vaults';
   private _folderClient: FolderClient | null = null;
   private _fileClient: FileClient | null = null;
+  private _metadataClient: MetadataClient | null = null;
 
   constructor(apiClient: ApiClient) {
     this.apiClient = apiClient;
@@ -41,6 +43,16 @@ export class VaultClient {
       this._fileClient = createFileClient(this.apiClient);
     }
     return this._fileClient;
+  }
+
+  /**
+   * Get the metadata client for file metadata operations
+   */
+  public get metadata(): MetadataClient {
+    if (!this._metadataClient) {
+      this._metadataClient = createMetadataClient(this.apiClient);
+    }
+    return this._metadataClient;
   }
 
   /**
