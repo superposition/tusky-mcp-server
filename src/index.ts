@@ -6,9 +6,11 @@ import {CallToolRequestSchema, ListToolsRequestSchema, Tool} from "@modelcontext
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from "dotenv";
 import { tuskyTools } from "./tools";
-import { createChallenge, verifyChallenge } from "./tools/authentication";
+import { createChallenge, verifyChallenge, checkAuthStatus } from "./tools/authentication";
+import { getApiKeys, createApiKey, deleteApiKey } from "./tools/apiKeys";
 import { TuskyApiResponse } from "./types/api";
 import { apiClient } from "./services/apiClient";
+import { authManager } from "./services/authManager";
 
 // Load environment variables
 dotenv.config();
@@ -22,7 +24,7 @@ if (!TUSKY_API_KEY) {
 class TuskyMcpClient {
   // Core client properties
   private server: Server;
-
+  
   constructor() {
     this.server = new Server(
       {
@@ -86,6 +88,31 @@ class TuskyMcpClient {
               nonce: string 
             });
             break;
+            
+          case "check-auth-status":
+            console.log("check-auth-status tool called");
+            response = await checkAuthStatus();
+            break;
+            
+          case "get-api-keys":
+            console.log("get-api-keys tool called");
+            response = await getApiKeys();
+            break;
+            
+          case "create-api-key":
+            console.log("create-api-key tool called");
+            response = await createApiKey(args as { 
+              name: string; 
+              expiresInDays?: number 
+            });
+            break;
+            
+          case "delete-api-key":
+            console.log("delete-api-key tool called");
+            response = await deleteApiKey(args as { 
+              keyId: string 
+            });
+            break;
 
           case "ping":
             console.log("ping tool called");
@@ -97,7 +124,8 @@ class TuskyMcpClient {
                 serverInfo: {
                   name: "tusky-mcp-server",
                   version: "0.1.0"
-                }
+                },
+                authStatus: authManager.isApiKeyValid() ? "authenticated" : "not_authenticated"
               }
             };
             break;
