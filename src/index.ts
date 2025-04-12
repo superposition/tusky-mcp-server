@@ -13,6 +13,7 @@ import { registerVaultModificationTools } from "./tools/vaultModification";
 import { registerFolderTools, registerFolderModificationTools } from "./tools/folders";
 import { registerFileTools } from "./tools/files";
 import { registerUserTools } from "./tools/user";
+import { registerSearchTools } from "./tools/search"; // Import search tools
 import { TuskyApiResponse } from "./types/api";
 import { apiClient, ApiClient } from "./services/apiClient";
 import { authManager } from "./services/authManager";
@@ -77,6 +78,9 @@ export class TuskyMcpServer {
     
     // Register user profile tools
     registerUserTools(this);
+    
+    // Register search tools
+    registerSearchTools(this);
   }
 
   /**
@@ -206,6 +210,7 @@ export class TuskyMcpServer {
           // and folder tools (list-folders, get-folder, create-folder, update-folder, delete-folder)
           // and file tools (list-files, get-file)
           // and user tools (get-profile, update-profile)
+          // and search tools (search-content)
           // are registered through their respective register*Tools functions
           // and executed through the tool executor system
 
