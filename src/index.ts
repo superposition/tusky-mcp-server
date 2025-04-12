@@ -14,6 +14,7 @@ import { registerFolderTools, registerFolderModificationTools } from "./tools/fo
 import { registerFileTools } from "./tools/files";
 import { registerUserTools } from "./tools/user";
 import { registerSearchTools } from "./tools/search"; // Import search tools
+import { registerUploadTools } from "./tools/uploads"; // Import upload tools
 import { TuskyApiResponse } from "./types/api";
 import { apiClient, ApiClient } from "./services/apiClient";
 import { authManager } from "./services/authManager";
@@ -81,6 +82,9 @@ export class TuskyMcpServer {
     
     // Register search tools
     registerSearchTools(this);
+    
+    // Register upload tools
+    registerUploadTools(this);
   }
 
   /**
@@ -211,6 +215,7 @@ export class TuskyMcpServer {
           // and file tools (list-files, get-file)
           // and user tools (get-profile, update-profile)
           // and search tools (search-content)
+          // and upload tools (initiate-upload, get-upload-status)
           // are registered through their respective register*Tools functions
           // and executed through the tool executor system
 
