@@ -182,6 +182,14 @@ export class TuskyApiClient {
   }
 
   /**
+   * Make a generic PATCH request to the Tusky API
+   */
+  public async patch<T>(endpoint: string, data?: any): Promise<T> {
+    const response = await this.apiClient.patch(endpoint, data);
+    return response.data;
+  }
+
+  /**
    * Make a generic DELETE request to the Tusky API
    */
   public async delete<T>(endpoint: string): Promise<T> {
