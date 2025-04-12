@@ -5,7 +5,10 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {CallToolRequestSchema, ListToolsRequestSchema, Tool} from "@modelcontextprotocol/sdk/types.js";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from "dotenv";
-import axios from "axios";
+import { tuskyTools } from "./tools";
+import { createChallenge, verifyChallenge } from "./tools/authentication";
+import { TuskyApiResponse } from "./types/api";
+import { apiClient } from "./services/apiClient";
 
 // Load environment variables
 dotenv.config();
@@ -16,25 +19,9 @@ if (!TUSKY_API_KEY) {
   throw new Error("TUSKY_API_KEY environment variable is required");
 }
 
-// Define API response interfaces for Tusky integration
-interface TuskyApiResponse {
-  // Common Tusky API response properties
-  success?: boolean;
-  error?: string;
-  message?: string;
-  data?: any;
-}
-
-interface AuthResponse extends TuskyApiResponse {
-  token?: string;
-  expires?: string;
-}
-
 class TuskyMcpClient {
   // Core client properties
   private server: Server;
-  private apiClient: any;
-  private apiToken: string | null = null;
 
   constructor() {
     this.server = new Server(
@@ -50,17 +37,6 @@ class TuskyMcpClient {
         },
       }
     );
-
-    // Setup Tusky API client
-    this.apiClient = axios.create({
-      baseURL: process.env.TUSKY_API_URL || 'https://api.tusky.io/v1',
-      headers: {
-        'accept': 'application/json',
-        'content-type': 'application/json',
-        'authorization': `Bearer ${TUSKY_API_KEY}`
-      },
-      timeout: 10000, // 10 seconds timeout
-    });
 
     this.setupHandlers();
     this.setupErrorHandling();
@@ -84,29 +60,33 @@ class TuskyMcpClient {
   }
 
   private setupToolHandlers(): void {
+    // List tools handler
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      // Define the Tusky tools here (placeholder for now)
-      const tools: Tool[] = [
-        {
-          name: "ping",
-          description: "Simple tool to test connection to the Tusky MCP server.",
-          inputSchema: {
-            type: "object",
-            properties: {},
-            required: []
-          }
-        },
-        // Add more Tusky tools as they are implemented
-      ];
-      return { tools };
+      // Return all registered Tusky tools
+      return { tools: tuskyTools };
     });
 
+    // Call tool handler
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       try {
         let response: TuskyApiResponse = {}; // Initialize with default or empty value
         const args = request.params.arguments ?? {};
 
         switch (request.params.name) {
+          case "create-challenge":
+            console.log("create-challenge tool called");
+            response = await createChallenge(args as { walletAddress: string });
+            break;
+
+          case "verify-challenge":
+            console.log("verify-challenge tool called");
+            response = await verifyChallenge(args as { 
+              walletAddress: string; 
+              signature: string; 
+              nonce: string 
+            });
+            break;
+
           case "ping":
             console.log("ping tool called");
             response = {
@@ -155,8 +135,6 @@ class TuskyMcpClient {
     await this.server.connect(transport);
     console.error("Tusky MCP server running on stdio");
   }
-
-  // Placeholder for future tool method implementations
 }
 
 // Format results for display
