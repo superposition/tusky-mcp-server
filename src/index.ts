@@ -12,10 +12,12 @@ import { registerVaultTools } from "./tools/vaults";
 import { registerVaultModificationTools } from "./tools/vaultModification";
 import { registerFolderTools, registerFolderModificationTools } from "./tools/folders";
 import { registerFileTools } from "./tools/files";
+import { registerUserTools } from "./tools/user";
 import { TuskyApiResponse } from "./types/api";
 import { apiClient, ApiClient } from "./services/apiClient";
 import { authManager } from "./services/authManager";
 import { VaultClient, createVaultClient } from "./services/vaultClient";
+import { UserClient } from "./clients/user";
 
 // Load environment variables
 dotenv.config();
@@ -30,6 +32,7 @@ export class TuskyMcpServer {
   // Core client properties
   private server: Server;
   private vaultClient: VaultClient | null = null;
+  private userClient: UserClient | null = null;
   
   constructor() {
     this.server = new Server(
@@ -71,6 +74,9 @@ export class TuskyMcpServer {
     
     // Register file listing and retrieval tools
     registerFileTools(this);
+    
+    // Register user profile tools
+    registerUserTools(this);
   }
 
   /**
@@ -89,6 +95,17 @@ export class TuskyMcpServer {
       this.vaultClient = createVaultClient(apiClient);
     }
     return this.vaultClient;
+  }
+
+  /**
+   * Get the user client instance
+   * @returns The user client for making API requests
+   */
+  public getUserClient(): UserClient {
+    if (!this.userClient) {
+      this.userClient = new UserClient(apiClient);
+    }
+    return this.userClient;
   }
 
   /**
@@ -188,6 +205,7 @@ export class TuskyMcpServer {
           // The vault tools (list-vaults, get-vault, create-vault, update-vault, delete-vault)
           // and folder tools (list-folders, get-folder, create-folder, update-folder, delete-folder)
           // and file tools (list-files, get-file)
+          // and user tools (get-profile, update-profile)
           // are registered through their respective register*Tools functions
           // and executed through the tool executor system
 
