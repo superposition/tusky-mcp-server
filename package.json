@@ -1,10 +1,10 @@
 {
-  "name": "mcp-server-template",
+  "name": "tusky-mcp-server",
   "version": "0.1.0",
-  "description": "Template for building MCP servers based on the Model Context Protocol",
+  "description": "MCP server for Tusky integration based on the Model Context Protocol",
   "type": "module",
   "bin": {
-    "mcp-server-template": "./build/index.js"
+    "tusky-mcp-server": "./build/index.js"
   },
   "files": [
     "build"
@@ -14,7 +14,9 @@
     "watch": "tsc --watch",
     "inspector": "npx @modelcontextprotocol/inspector build/index.js",
     "prepublishOnly": "npm run build",
-    "test-client": "node test-client.js"
+    "test-client": "node test-client.js",
+    "test": "jest",
+    "start": "node build/index.js"
   },
   "keywords": [
     "mcp",
@@ -23,16 +25,19 @@
     "claude-desktop",
     "anthropic",
     "mcp-server",
-    "template"
+    "tusky",
+    "mastodon"
   ],
-  "author": "Your Name",
+  "author": "Tusky Development Team",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "0.6.0",
+    "axios": "^1.6.2",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
+    "jest": "^29.7.0",
     "typescript": "^5.3.3"
   }
 }
