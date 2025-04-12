@@ -1,6 +1,11 @@
+// src/tools/index.ts
+
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { createChallengeToolSchema, verifyChallengeToolSchema, checkAuthStatusToolSchema } from "./authentication";
 import { getApiKeysToolSchema, createApiKeyToolSchema, deleteApiKeyToolSchema } from "./apiKeys";
+
+// We don't import vault tool schemas directly since they're registered 
+// through the registerVaultTools function in the TuskyMcpServer class
 
 /**
  * Export all Tusky MCP tools 
@@ -16,5 +21,13 @@ export const tuskyTools: Tool[] = [
   createApiKeyToolSchema,
   deleteApiKeyToolSchema,
   
-  // Add more tools as they're implemented in subsequent tasks
+  // Vault tools are registered dynamically through registerVaultTools 
+  // in the TuskyMcpServer class
+  
+  // Utility tools
+  {
+    name: "ping",
+    description: "Check if the Tusky MCP server is running correctly",
+    schema: {} // No parameters needed
+  }
 ];

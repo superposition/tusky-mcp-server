@@ -8,9 +8,11 @@ import dotenv from "dotenv";
 import { tuskyTools } from "./tools";
 import { createChallenge, verifyChallenge, checkAuthStatus } from "./tools/authentication";
 import { getApiKeys, createApiKey, deleteApiKey } from "./tools/apiKeys";
+import { registerVaultTools } from "./tools/vaults";
 import { TuskyApiResponse } from "./types/api";
-import { apiClient } from "./services/apiClient";
+import { apiClient, ApiClient } from "./services/apiClient";
 import { authManager } from "./services/authManager";
+import { VaultClient, createVaultClient } from "./services/vaultClient";
 
 // Load environment variables
 dotenv.config();
@@ -21,9 +23,10 @@ if (!TUSKY_API_KEY) {
   throw new Error("TUSKY_API_KEY environment variable is required");
 }
 
-class TuskyMcpClient {
+export class TuskyMcpServer {
   // Core client properties
   private server: Server;
+  private vaultClient: VaultClient | null = null;
   
   constructor() {
     this.server = new Server(
@@ -42,6 +45,43 @@ class TuskyMcpClient {
 
     this.setupHandlers();
     this.setupErrorHandling();
+    
+    // Register all tools
+    this.registerAllTools();
+  }
+
+  /**
+   * Register all available tools
+   */
+  private registerAllTools(): void {
+    // Register vault tools
+    registerVaultTools(this);
+  }
+
+  /**
+   * Register a tool with the server
+   */
+  public registerTool(tool: Tool): void {
+    tuskyTools.push(tool);
+  }
+
+  /**
+   * Get the vault client instance
+   * @returns The vault client for making API requests
+   */
+  public getVaultClient(): VaultClient {
+    if (!this.vaultClient) {
+      this.vaultClient = createVaultClient(apiClient);
+    }
+    return this.vaultClient;
+  }
+
+  /**
+   * Check if the current session is authenticated
+   * @returns True if authenticated, false otherwise
+   */
+  public isAuthenticated(): boolean {
+    return authManager.isApiKeyValid();
   }
 
   private setupErrorHandling(): void {
@@ -130,6 +170,9 @@ class TuskyMcpClient {
             };
             break;
 
+          // The list-vaults and get-vault tools are registered through registerVaultTools
+          // and executed through the tool executor system
+
           default:
             throw new McpError(
               ErrorCode.MethodNotFound,
@@ -189,10 +232,10 @@ function formatResults(response: TuskyApiResponse): string {
 
 // Export server start function
 export async function serve(): Promise<void> {
-  const client = new TuskyMcpClient();
+  const client = new TuskyMcpServer();
   await client.run();
 }
 
 // Start the server when this file is run directly
-const server = new TuskyMcpClient();
+const server = new TuskyMcpServer();
 server.run().catch(console.error);
