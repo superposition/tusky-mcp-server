@@ -5,33 +5,41 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {CallToolRequestSchema, ListToolsRequestSchema, Tool} from "@modelcontextprotocol/sdk/types.js";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import dotenv from "dotenv";
+import axios from "axios";
 
 // Load environment variables
 dotenv.config();
 
-// Check for API key (replace with your own API key check)
-const API_KEY = process.env.YOUR_API_KEY;
-if (!API_KEY) {
-  throw new Error("YOUR_API_KEY environment variable is required");
+// Check for Tusky API key
+const TUSKY_API_KEY = process.env.TUSKY_API_KEY;
+if (!TUSKY_API_KEY) {
+  throw new Error("TUSKY_API_KEY environment variable is required");
 }
 
-// Define your response interface
-interface YourApiResponse {
-  // Define your API response structure here
-  // For example:
-  // query?: string;
-  // results?: any[];
-  // etc...
+// Define API response interfaces for Tusky integration
+interface TuskyApiResponse {
+  // Common Tusky API response properties
+  success?: boolean;
+  error?: string;
+  message?: string;
+  data?: any;
 }
 
-class TemplateClient {
+interface AuthResponse extends TuskyApiResponse {
+  token?: string;
+  expires?: string;
+}
+
+class TuskyMcpClient {
   // Core client properties
   private server: Server;
+  private apiClient: any;
+  private apiToken: string | null = null;
 
   constructor() {
     this.server = new Server(
       {
-        name: "your-mcp-template",
+        name: "tusky-mcp-server",
         version: "0.1.0",
       },
       {
@@ -43,15 +51,16 @@ class TemplateClient {
       }
     );
 
-    // Setup API client here if needed
-    // For example, with axios:
-    // this.apiClient = axios.create({
-    //   headers: {
-    //     'accept': 'application/json',
-    //     'content-type': 'application/json',
-    //     'authorization': `Bearer ${API_KEY}`
-    //   }
-    // });
+    // Setup Tusky API client
+    this.apiClient = axios.create({
+      baseURL: process.env.TUSKY_API_URL || 'https://api.tusky.io/v1',
+      headers: {
+        'accept': 'application/json',
+        'content-type': 'application/json',
+        'authorization': `Bearer ${TUSKY_API_KEY}`
+      },
+      timeout: 10000, // 10 seconds timeout
+    });
 
     this.setupHandlers();
     this.setupErrorHandling();
@@ -60,7 +69,7 @@ class TemplateClient {
   private setupErrorHandling(): void {
     // Error handling setup
     this.server.onerror = (error) => {
-      console.error("[MCP Error]", error);
+      console.error("[Tusky MCP Error]", error);
     };
 
     // Handle process termination
@@ -76,76 +85,41 @@ class TemplateClient {
 
   private setupToolHandlers(): void {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      // Define your tools here
+      // Define the Tusky tools here (placeholder for now)
       const tools: Tool[] = [
         {
-          name: "example-tool-1",
-          description: "Description of your first tool. Explain what it does, when to use it, and its capabilities.",
+          name: "ping",
+          description: "Simple tool to test connection to the Tusky MCP server.",
           inputSchema: {
             type: "object",
-            properties: {
-              // Define the parameters for your tool
-              parameter1: { 
-                type: "string", 
-                description: "Description of parameter1" 
-              },
-              parameter2: {
-                type: "number",
-                description: "Description of parameter2",
-                default: 10
-              },
-              // Add more parameters as needed
-            },
-            required: ["parameter1"] // List required parameters
+            properties: {},
+            required: []
           }
         },
-        // Add more tools as needed
-        {
-          name: "example-tool-2",
-          description: "Description of your second tool.",
-          inputSchema: {
-            type: "object",
-            properties: {
-              // Define the parameters for your second tool
-              urls: { 
-                type: "array",
-                items: { type: "string" },
-                description: "List of items to process"
-              },
-              // Add more parameters as needed
-            },
-            required: ["urls"] // List required parameters
-          }
-        },
+        // Add more Tusky tools as they are implemented
       ];
       return { tools };
     });
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       try {
-        let response: YourApiResponse = {}; // Initialize with default or empty value
+        let response: TuskyApiResponse = {}; // Initialize with default or empty value
         const args = request.params.arguments ?? {};
 
         switch (request.params.name) {
-          case "example-tool-1":
-            // Call your first tool's functionality
-            // response = await this.exampleTool1({
-            //   parameter1: args.parameter1,
-            //   parameter2: args.parameter2,
-            //   // Add more parameters as needed
-            // });
-            console.log("example-tool-1 called with:", args);
-            response = {/* your implementation result */};
-            break;
-          
-          case "example-tool-2":
-            // Call your second tool's functionality
-            // response = await this.exampleTool2({
-            //   urls: args.urls,
-            //   // Add more parameters as needed
-            // });
-            console.log("example-tool-2 called with:", args);
-            response = {/* your implementation result */};
+          case "ping":
+            console.log("ping tool called");
+            response = {
+              success: true,
+              message: "Tusky MCP server is running and connected successfully",
+              data: {
+                timestamp: new Date().toISOString(),
+                serverInfo: {
+                  name: "tusky-mcp-server",
+                  version: "0.1.0"
+                }
+              }
+            };
             break;
 
           default:
@@ -163,10 +137,11 @@ class TemplateClient {
         };
       } catch (error: any) {
         // Handle errors appropriately
+        console.error("[Error in tool handler]", error);
         return {
           content: [{
             type: "text",
-            text: `API error: ${error.message}`
+            text: `Tusky API error: ${error.message}`
           }],
           isError: true,
         }
@@ -178,36 +153,40 @@ class TemplateClient {
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error("Template MCP server running on stdio");
+    console.error("Tusky MCP server running on stdio");
   }
 
-  // Implement your tool methods here
-  // For example:
-  // async exampleTool1(params: any): Promise<YourApiResponse> {
-  //   // Implement your tool's functionality
-  //   // This is where you would call your APIs or perform operations
-  //   return { /* your response */ };
-  // }
-  //
-  // async exampleTool2(params: any): Promise<YourApiResponse> {
-  //   // Implement your tool's functionality
-  //   return { /* your response */ };
-  // }
+  // Placeholder for future tool method implementations
 }
 
 // Format results for display
-function formatResults(response: YourApiResponse): string {
-  // Format your API response into human-readable text
-  // This is just a placeholder - implement your own formatting logic
-  return "Formatted results would appear here\n" + JSON.stringify(response, null, 2);
+function formatResults(response: TuskyApiResponse): string {
+  if (response.success === false || response.error) {
+    return `Error: ${response.message || response.error || "Unknown error"}`;
+  }
+  
+  // Format success responses
+  let result = "";
+  if (response.message) {
+    result += `${response.message}\n\n`;
+  }
+  
+  if (response.data) {
+    // Format the data in a readable way
+    result += JSON.stringify(response.data, null, 2);
+  } else {
+    result += JSON.stringify(response, null, 2);
+  }
+  
+  return result;
 }
 
 // Export server start function
 export async function serve(): Promise<void> {
-  const client = new TemplateClient();
+  const client = new TuskyMcpClient();
   await client.run();
 }
 
 // Start the server when this file is run directly
-const server = new TemplateClient();
+const server = new TuskyMcpClient();
 server.run().catch(console.error);
