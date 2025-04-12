@@ -44,6 +44,47 @@ export interface GetFileResponse extends TuskyApiResponse {
 }
 
 /**
+ * Parameters for updating a file
+ */
+export interface UpdateFileParams {
+  id: string;
+  vaultId: string;
+  name?: string;
+  folderId?: string; // Target folder to move to
+  description?: string;
+  status?: 'active' | 'archived' | 'deleted';
+}
+
+/**
+ * Response for updating a file
+ */
+export interface UpdateFileResponse extends TuskyApiResponse {
+  data?: {
+    file: FileDetails;
+  };
+}
+
+/**
+ * Parameters for deleting a file
+ */
+export interface DeleteFileParams {
+  id: string;
+  vaultId: string;
+  permanent?: boolean; // If true, permanently deletes the file
+}
+
+/**
+ * Response for deleting a file
+ */
+export interface DeleteFileResponse extends TuskyApiResponse {
+  data?: {
+    id: string;
+    deleted: boolean;
+    permanent: boolean;
+  };
+}
+
+/**
  * File item as returned in listings
  */
 export interface FileItem {
