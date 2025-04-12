@@ -172,7 +172,26 @@ export class TuskyApiClient {
     const response = await this.apiClient.post(endpoint, data);
     return response.data;
   }
+
+  /**
+   * Make a generic PUT request to the Tusky API
+   */
+  public async put<T>(endpoint: string, data?: any): Promise<T> {
+    const response = await this.apiClient.put(endpoint, data);
+    return response.data;
+  }
+
+  /**
+   * Make a generic DELETE request to the Tusky API
+   */
+  public async delete<T>(endpoint: string): Promise<T> {
+    const response = await this.apiClient.delete(endpoint);
+    return response.data;
+  }
 }
 
 // Export singleton instance
 export const apiClient = new TuskyApiClient();
+
+// Export type for use in other services
+export type ApiClient = TuskyApiClient;
