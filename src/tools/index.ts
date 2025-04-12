@@ -1,4 +1,4 @@
-// src/tools/index.ts
+// src/tools/index.ts (Updated with vault modification tools)
 
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { createChallengeToolSchema, verifyChallengeToolSchema, checkAuthStatusToolSchema } from "./authentication";
@@ -22,7 +22,7 @@ export const tuskyTools: Tool[] = [
   deleteApiKeyToolSchema,
   
   // Vault tools are registered dynamically through registerVaultTools 
-  // in the TuskyMcpServer class
+  // and registerVaultModificationTools in the TuskyMcpServer class
   
   // Utility tools
   {

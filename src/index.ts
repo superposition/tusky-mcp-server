@@ -9,6 +9,7 @@ import { tuskyTools } from "./tools";
 import { createChallenge, verifyChallenge, checkAuthStatus } from "./tools/authentication";
 import { getApiKeys, createApiKey, deleteApiKey } from "./tools/apiKeys";
 import { registerVaultTools } from "./tools/vaults";
+import { registerVaultModificationTools } from "./tools/vaultModification";
 import { TuskyApiResponse } from "./types/api";
 import { apiClient, ApiClient } from "./services/apiClient";
 import { authManager } from "./services/authManager";
@@ -54,8 +55,11 @@ export class TuskyMcpServer {
    * Register all available tools
    */
   private registerAllTools(): void {
-    // Register vault tools
+    // Register vault listing and retrieval tools
     registerVaultTools(this);
+    
+    // Register vault creation and modification tools
+    registerVaultModificationTools(this);
   }
 
   /**
@@ -170,7 +174,8 @@ export class TuskyMcpServer {
             };
             break;
 
-          // The list-vaults and get-vault tools are registered through registerVaultTools
+          // The vault tools (list-vaults, get-vault, create-vault, update-vault, delete-vault)
+          // are registered through registerVaultTools and registerVaultModificationTools
           // and executed through the tool executor system
 
           default:
