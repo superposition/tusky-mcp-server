@@ -1,5 +1,5 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
-import { createChallengeToolSchema, verifyChallengeToolSchema } from "./authentication";
+import { createChallengeToolSchema, verifyChallengeToolSchema, checkAuthStatusToolSchema } from "./authentication";
 import { getApiKeysToolSchema, createApiKeyToolSchema, deleteApiKeyToolSchema } from "./apiKeys";
 
 /**
@@ -9,6 +9,7 @@ export const tuskyTools: Tool[] = [
   // Authentication tools
   createChallengeToolSchema,
   verifyChallengeToolSchema,
+  checkAuthStatusToolSchema,
   
   // API Key Management tools
   getApiKeysToolSchema,
