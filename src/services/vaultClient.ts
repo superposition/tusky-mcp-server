@@ -7,6 +7,7 @@ import {
   GetVaultParams,
   GetVaultResponse
 } from '../types/vault';
+import { FolderClient, createFolderClient } from './folderClient';
 
 /**
  * Client for interacting with Tusky Vault API endpoints
@@ -14,9 +15,20 @@ import {
 export class VaultClient {
   private apiClient: ApiClient;
   private basePath = '/vaults';
+  private _folderClient: FolderClient | null = null;
 
   constructor(apiClient: ApiClient) {
     this.apiClient = apiClient;
+  }
+
+  /**
+   * Get the folder client for folder operations
+   */
+  public get folders(): FolderClient {
+    if (!this._folderClient) {
+      this._folderClient = createFolderClient(this.apiClient);
+    }
+    return this._folderClient;
   }
 
   /**
